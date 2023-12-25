@@ -7,15 +7,10 @@ IMAGE_PATH = 'images/'
 
 if __name__ == '__main__':
     st.set_page_config(
-     page_title='Multi Model Search',
+     page_title='Multi Modal Search',
      layout="wide",
      initial_sidebar_state="expanded",
     )
-
-    st.session_state['image_processor'] = image_processing.ImageProcessor()
-
-    st.session_state['image_storage'] = glob(IMAGE_PATH + '*.jpg')
-    st.session_state['curr_file_id'] = 'none'
 
     #### Main view
     st.session_state['res_col'], st.session_state['detail_col'] = st.columns(2)
@@ -33,8 +28,14 @@ if __name__ == '__main__':
     st.session_state['sidebar'].header('Input')
     st.session_state['img_upload'] = st.session_state['sidebar'].file_uploader('Upload Screenshot', ['jpg', 'png'])
     #### Sidebar end
-    print(st.session_state)
 
+if 'models' not in st.session_state:
+    st.session_state['models'] = True
+    st.session_state['image_processor'] = image_processing.ImageProcessor()
+
+    st.session_state['image_storage'] = glob(IMAGE_PATH + '*.jpg')
+    st.session_state['curr_file_id'] = 'none'
+    st.session_state['database'] = db.VectorStore()
 
 def update_result(res):
     res = [r.payload for r in res]
@@ -79,10 +80,11 @@ def load_document(name: str):
 if st.session_state['img_upload'] is not None and st.session_state['img_upload'].file_id != st.session_state['curr_file_id']:
     st.session_state['curr_file_id'] = st.session_state['img_upload'].file_id
     byte_data = st.session_state['img_upload'].getvalue()
-    chunk_embeddings = st.session_state['image_processor'].encode(byte_data)
+    img_embedding, text_embedding = st.session_state['image_processor'].encode(byte_data)
     
     # find topK matches
-    res = db.search_data_filter(chunk_embeddings, 5)
+    res = st.session_state['database'].query(img_embedding, text_embedding, 5)
+    print(res)
     # load images
     update_result(res)
 

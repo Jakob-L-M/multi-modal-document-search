@@ -8,15 +8,15 @@ class ImageProcessor:
 
     def __init__(self):
         self.device = 'mps' # use torch apple silicon backend, change to 'cuda' for nvidia gpu or 'cpu'
-        print('Loading image model...', end='')
+        print('Loading image model...', end='', flush=True)
         self.image_model, _, self.preprocess = open_clip.create_model_and_transforms('ViT-g-14', pretrained='laion2b_s12b_b42k')
         self.image_model.to(self.device) 
-        print('\b\b\b ☑️')
+        print('\b\b\b ☑️ ', flush=True)
 
-        print('Loading OCR model...', end='')
+        print('Loading OCR model...', end='', flush=True)
         self.text_model = SentenceTransformer('embaas/sentence-transformers-e5-large-v2')
         self.text_model.to(self.device)
-        print('\b\b\b ☑️')
+        print('\b\b\b ☑️ ', flush=True)
 
     def encode(self, img, is_path = False):
         if is_path:
@@ -31,10 +31,10 @@ class ImageProcessor:
 
         embeddings = [self.image_model.encode_image(self.preprocess(c).unsqueeze(0).to(self.device))[0].tolist() for c in chunks]
 
-        flatten_embedding = [item for sublist in embeddings for item in sublist]
-        print(text, self.text_model.encode(text))
+        flatten_img_embedding = [item for sublist in embeddings for item in sublist]
+        text_embedding = self.text_model.encode(text)
 
-        return flatten_embedding
+        return flatten_img_embedding, [float(j) for j in text_embedding]
 
     def get_chunks(self, img):
         img_chunks = []
