@@ -1,0 +1,8 @@
+# folder for croped files
+images/
+# folder for input files
+pdfs/*.pdf
+# vector store storage location
+vector_store/
+
+.DS_Store
