@@ -31,8 +31,21 @@ class VectorStore:
             query_vector=text_vector
         )
 
-        print(img_hits, text_hits)
-        # TODO merge res
+        res = sorted(img_hits + text_hits, key=lambda x: x.id)
+        print(res[0].id, res[0].score)
+        # merge res
+        i = 0
+        while i + 1 < len(res):
+            # Both databases returned page of document
+            if res[i].id == res[i+1].id:
+                res[i].score = (res[i].score + res[i+1].score)/2
+                # remove duplicate after score was adjusted
+                del res[i+1]
+            # only one returned it
+            else:
+                res[i].score /= 2
+            i += 1
+        return sorted(res, key=lambda x: x.score)
 
     def insert(self, id, vector: list, filename, page, v_type):
         client = self.texts if v_type == 'text' else self.images
