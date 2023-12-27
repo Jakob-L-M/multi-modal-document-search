@@ -39,7 +39,7 @@ if 'models' not in st.session_state:
 
 def update_result(res):
     res = [r.payload for r in res]
-    st.x['details_container'].empty()
+    st.session_state['detail_container'].empty()
     with st.session_state['res_container'].container():
         for r in res:
             file = r['filename']
@@ -48,8 +48,8 @@ def update_result(res):
             file_name, download, details = container.columns([8,1,1])
             file_name.markdown('##### ' + file + ' | Page: ' + str(r['page']+1))
             with open('pdfs/' + file + '.pdf', 'rb') as f:
-                download.download_button('⇩', data=f, file_name=file + '.pdf',key='dl_' + file)
-            details.button('🔍', on_click=load_document, args=[file], key='dt_' + file)
+                download.download_button('⇩', data=f, file_name=file + '.pdf',key='dl_' + file + str(r['page']).zfill(5))
+            details.button('🔍', on_click=load_document, args=[file], key='dt_' + file + str(r['page']).zfill(5))
             container.image(img_path)
             container.markdown("""---""")
 
@@ -84,7 +84,6 @@ if st.session_state['img_upload'] is not None and st.session_state['img_upload']
     
     # find topK matches
     res = st.session_state['database'].query(img_embedding, text_embedding, 5)
-    print(res)
     # load images
     update_result(res)
 
