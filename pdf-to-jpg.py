@@ -22,7 +22,6 @@ for pdf in tqdm(glob('pdfs/*.pdf')):
         images[i].save(image_path + name + '_' + str(i+1).zfill(5) +'.jpg', 'JPEG')
         img_emb, text_emb = image_processor.encode(image_path + name + '_' + str(i+1).zfill(5) +'.jpg', is_path=True)
         database.insert(c, img_emb, name, i, 'image')
-        print(text_emb, text_emb[0], type(text_emb))
         database.insert(c, [float(j) for j in text_emb], name, i, 'text')
         c += 1
     

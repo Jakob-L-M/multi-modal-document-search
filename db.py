@@ -32,7 +32,6 @@ class VectorStore:
         )
 
         res = sorted(img_hits + text_hits, key=lambda x: x.id)
-        print(res[0].id, res[0].score)
         # merge res
         i = 0
         while i + 1 < len(res):
